@@ -13,11 +13,17 @@
  *    Those are the emails the seeker must see herself.
  *  - Rules label "none" means the system does not know: stays, always.
  *
+ * decideLocal is the no-LLM decision, used for mail that never reaches a
+ * model (specific mail and unknown mail): specific mail is labeled only,
+ * unknown mail stays, generic mail without an LLM vote also stays (no
+ * agreement, so no archive).
+ *
  * In this demo, "archive" is a printed decision, not a real archive: there
  * is no real mail here to archive.
  */
 import type { Label, RuleResult } from "./rules.js";
 import type { LLMResult } from "./llama.js";
+import { LOCAL_ONLY } from "./safety.js";
 
 export type GateDecision = "archive" | "label-only" | "stays";
 
@@ -56,5 +62,21 @@ export function decideGate(
   return {
     decision: "archive",
     reason: `agree on ${rules.label} at ${llm.confidence}`,
+  };
+}
+
+export function decideLocal(rules: RuleResult): GateOutcome {
+  if (rules.label === "none") {
+    return { decision: "stays", reason: "rules matched nothing" };
+  }
+  if ((LOCAL_ONLY as readonly string[]).includes(rules.label)) {
+    return {
+      decision: "label-only",
+      reason: `${rules.label} is never auto-archived`,
+    };
+  }
+  return {
+    decision: "stays",
+    reason: "no LLM vote, so no archive",
   };
 }

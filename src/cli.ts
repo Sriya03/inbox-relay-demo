@@ -1,17 +1,19 @@
 /**
  * Demo CLI. Two modes:
  *  - default (no args): offline demo. Runs the rules baseline + safety
- *    screen over the 14 synthetic emails and prints label, confidence,
- *    rule, safety verdict, decision, and draft. Makes ZERO API calls, so
- *    it runs without any key.
+ *    screen over the synthetic emails and prints label, confidence, rule,
+ *    safety verdict, LLM handling, decision, and draft. Makes ZERO API
+ *    calls, so it runs without any key.
  *  - --score: benchmark mode. Runs every model in META_MODELS over the
- *    same golden set with the same prompt and prints the comparison table
- *    (accuracy, calibration, format failures, gate precision) plus the
- *    rules baseline. Needs .env (see .env.example). No key is committed.
+ *    generic golden set with the same prompt and prints the comparison
+ *    table (accuracy, calibration, format failures, gate precision) plus
+ *    the rules baseline. Needs .env (see .env.example). No key is
+ *    committed.
  */
 import "dotenv/config";
 import { readFile } from "node:fs/promises";
-import { classifyByRules, LABELS, type Email } from "./rules.js";
+import { classifyByRules, type Email } from "./rules.js";
+import { LLM_ELIGIBLE } from "./safety.js";
 import { draftFor } from "./drafts.js";
 import { screenForLLM } from "./safety.js";
 import { makeLlamaClassifier } from "./llama.js";
@@ -39,14 +41,15 @@ if (process.argv.includes("--score")) {
     );
     process.exit(1);
   }
-  const labelEmails = emails.filter(
-    (e) => e.expected && (LABELS as readonly string[]).includes(e.expected),
+  const eligible = LLM_ELIGIBLE as readonly string[];
+  const genericEmails = emails.filter(
+    (e) => e.expected && eligible.includes(e.expected),
   );
-  const rulesCorrect = labelEmails.filter(
+  const rulesCorrect = genericEmails.filter(
     (e) => classifyByRules(e).label === e.expected,
   ).length;
   console.log(
-    `rules baseline: ${rulesCorrect}/${labelEmails.length} correct (no LLM)`,
+    `rules baseline: ${rulesCorrect}/${genericEmails.length} correct (generic mail, no LLM)`,
   );
   console.log("");
   const scores: ModelScore[] = [];
@@ -66,17 +69,29 @@ if (process.argv.includes("--score")) {
     console.log(
       `  safety → ${screen.allowed ? "ok" : `BLOCKED: ${screen.reason}`}`,
     );
-    if (screen.allowed) {
+    if (!screen.allowed) {
+      console.log(`  LLM → skipped (sensitive — never sent)`);
+    } else if (result.label === "none") {
+      console.log(`  LLM → never sent (unknown mail stays local)`);
+    } else if (
+      !(LLM_ELIGIBLE as readonly string[]).includes(result.label)
+    ) {
+      console.log(`  LLM → never sent (specific mail stays local)`);
+    } else {
       console.log(
         `  LLM → not called in demo mode (offline; run npm run score with .env)`,
       );
-    } else {
-      console.log(`  LLM → skipped (sensitive — never sent)`);
     }
     if (result.label === "none") {
       console.log(`  decision → stays in inbox (low confidence)`);
+    } else if (
+      !(LLM_ELIGIBLE as readonly string[]).includes(result.label)
+    ) {
+      console.log(`  decision → label-only (specific mail is never archived)`);
     } else {
-      console.log(`  decision → label shown; no archive in demo`);
+      console.log(
+        `  decision → label shown; archive-eligible only with LLM agreement (see npm run score)`,
+      );
     }
     console.log(`  draft → ${draft ?? "none (no reply needed)"}`);
     console.log("");

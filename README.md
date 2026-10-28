@@ -12,20 +12,21 @@ hours a week.
 
 This demo labels every email and drafts a reply where one is needed, so the
 seeker can spot interviews and offers at a glance and answer in minutes. It
-is a command-line demo on 14 synthetic emails: rules label them, a safety
-screen checks them, and (with a key) Llama models classify them behind an
-agreement gate.
+is a command-line demo on 22 synthetic emails: rules label them, a safety
+screen checks them, and (with a key) Llama models classify the generic
+ones behind an agreement gate.
 
-## How it works: rules first, LLM second, gate decides
+## How it works: rules first, LLM second (only for generic mail), gate decides
 
 - Rules: fast, precise, offline. They catch the clear cases (an offer
   letter, a rejection) but miss reworded mail.
 - LLM: flexible. It catches intent and paraphrases the rules miss, but it
-  can be overconfident and wrong.
-- Gate: the two must agree AND the LLM must be confident (>= 0.85), or
-  the mail stays in the inbox. Interview and offer mail is never
-  auto-archived: it is labeled only, because those are the emails the
-  seeker must see herself.
+  can be overconfident and wrong. It only ever sees generic template mail
+  (see below): specific mail never reaches it.
+- Gate: for generic mail, the two must agree AND the LLM must be
+  confident (>= 0.85), or the mail stays in the inbox. Interview and offer
+  mail is never auto-archived: it is labeled only, because those are the
+  emails the seeker must see herself.
 
 Neither side alone is trusted. The gate takes the intersection, and the
 honest "I don't know" (label `none`) stays in the inbox instead of being
@@ -38,16 +39,26 @@ Security numbers and dates of birth. Immigration mail carries USCIS case
 numbers. Payroll and bank mail carry account details. A triager that sends
 mail to an LLM ships all of that to a third-party API.
 
-So this demo screens every email BEFORE any LLM call:
+So this demo has two boundary layers, both enforced in code before any
+network call:
 
-- Blocked senders: banks, government/immigration, employer, payroll.
-- Blocked content: SSN, USCIS case numbers, passport, date of birth, bank
-  account references.
-- Blocked mail is rules-only: it is never sent to any model.
-- Payloads are minimized: subject + first 1000 chars of body, no
-  attachments, no full threads.
-- The demo data is synthetic: no real mail, no credentials, no API keys
-  anywhere in this repo or its history.
+1. Sensitive screen: blocked senders (banks, government/immigration,
+   employer, payroll) and blocked content (SSN, USCIS case numbers,
+   passport, date of birth, bank account references). Blocked mail is
+   rules-only: it is never sent to any model.
+2. Category rule: only generic template mail (application confirmations,
+   form rejections, promos, newsletters) may reach a model. That mail is
+   bulk mail: it reveals nothing specific about the seeker's dealings.
+   Specific mail (interviews, offers, recruiter threads) carries the
+   seeker's actual dealings: company names, roles, timing, people. That
+   mail never leaves the machine: rules-only, label-only, zero API calls.
+   Unknown mail also stays local: an unknown email might contain anything,
+   so it is never sent to find out.
+
+Payloads for the mail that does go to a model are minimized: subject +
+first 1000 chars of body, no attachments, no full threads. And the demo
+data is synthetic: no real mail, no credentials, no API keys anywhere in
+this repo or its history.
 
 The guardrails are what let this tool graduate from a demo to a real
 inbox. Without them, running it on real mail would leak personal
@@ -57,18 +68,21 @@ while the personal part never leaves the machine.
 ## How Meta models are used, and which one is best
 
 Meta's Llama models (via the Meta Model API, using the hackathon credits)
-fill the LLM slot in the gate. They do not replace the rules; they cover
-what the rules miss, and the gate keeps them honest.
+fill the LLM slot in the gate, for generic mail only. They do not replace
+the rules; they cover what the rules miss on the bulk mail, and the gate
+keeps them honest.
 
 Best is not picked on vibes. Every candidate model runs over the same
-14-email golden set with the same fixed prompt (temperature 0, JSON-only
-output), and the scorer prints one table: accuracy, confidence when right
-vs wrong (calibration), format failures, agreement with the rules, and
-gate archive precision. The winner is the highest accuracy, then the best
-calibration, then the fewest format failures. If a smaller model ties a
-bigger one, the smaller one wins: same score, less to run. The rules
-baseline is printed alongside, so you can see exactly what the LLM adds
-over rules alone.
+generic golden set (13 emails) with the same fixed prompt (temperature 0,
+JSON-only output), and the scorer prints one table: accuracy, confidence
+when right vs wrong (calibration), format failures, agreement with the
+rules, and gate archive precision. The winner is the highest accuracy,
+then the best calibration, then the fewest format failures. If a smaller
+model ties a bigger one, the smaller one wins: same score, less to run.
+The rules baseline is printed alongside, so you can see exactly what the
+LLM adds over rules alone. The scorer also proves the boundary: the 7
+local-only emails and the 2 blocked emails must show zero model calls,
+and any call on them counts as a failure.
 
 Status: the client, gate, and scorer are built. The benchmark run is
 pending (it needs a key and model IDs from the credits dashboard in
@@ -77,14 +91,22 @@ winner is claimed before it is measured.
 
 ## Labels
 
+LLM-eligible (generic template mail, may reach a model and be archived):
+
+- application: confirms your application was received, with no decision yet
+- rejects: says you were not selected, or they are moving forward with others
+- promos: marketing, discounts, course sales, or bulk offers
+- read-later: a newsletter, article, or roundup worth reading later, not a job pitch
+
+Local-only (specific mail, never sent to any model, never auto-archived):
+
 - interview: invites you to, schedules, or confirms an interview, screen, or round
 - offer-process: offer letter, compensation, background check, or onboarding steps
 - recruiter/new: first outreach from a recruiter about a role you have not discussed before
 - recruiter/replied: continues an existing recruiter conversation (a reply) without inviting you to an interview
-- rejects: says you were not selected, or they are moving forward with others
-- application: confirms your application was received, with no decision yet
-- read-later: a newsletter, article, or roundup worth reading later, not a job pitch
-- promos: marketing, discounts, course sales, or bulk offers
+
+Other outcomes:
+
 - none: no rule matched; stays in the inbox (the honest "I don't know")
 - blocked: the safety screen refused it; never sent to any model
 
@@ -92,15 +114,16 @@ winner is claimed before it is measured.
 
 Built and runnable right now:
 
-- `data/synthetic-emails.json`: 14 invented emails, each with an `expected`
+- `data/synthetic-emails.json`: 22 invented emails, each with an `expected`
   label (the ground truth for scoring).
 - `src/rules.ts`: first-match rules over the 8-label taxonomy.
-- `src/safety.ts`: the screen described above.
+- `src/safety.ts`: the two boundary layers described above.
 - `src/prompt.ts`: the fixed classification prompt (same for every model).
-- `src/llama.ts`: the Meta model client (screen first, minimized payload,
-  validates label and confidence).
-- `src/gate.ts`: the agreement gate.
-- `src/evaluate.ts`: the benchmark scorer and comparison table.
+- `src/llama.ts`: the Meta model client (screen first, category check,
+  minimized payload, validates label and confidence).
+- `src/gate.ts`: the agreement gate, plus the no-LLM local decision.
+- `src/evaluate.ts`: the benchmark scorer and comparison table, including
+  the zero-calls proof for local-only and blocked mail.
 - `src/cli.ts`: demo mode (offline, zero API calls) and `--score` mode
   (benchmark).
 - `src/drafts.ts`: reply templates for 5 labels; none for
@@ -135,8 +158,10 @@ npm run build
 npm run demo    # offline: rules + safety + drafts, zero API calls
 ```
 
-Demo output: 14 emails. 12 pass the screen (LLM line reads "not called in
-demo mode"); 2 are blocked with "LLM skipped (sensitive — never sent)".
+Demo output: 22 emails. 13 generic ones read "not called in demo mode";
+6 specific ones read "never sent (specific mail stays local)"; 1 unknown
+reads "never sent (unknown mail stays local)"; 2 blocked ones read "LLM
+skipped (sensitive — never sent)".
 
 ```sh
 cp .env.example .env   # fill in META_API_BASE_URL, META_API_KEY, META_MODELS

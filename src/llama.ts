@@ -1,5 +1,5 @@
 /**
- * Meta model client: the LLM slot in the gate.
+ * Meta model client: the LLM slot in the gate, for generic mail only.
  *
  * Config is env-driven (see .env.example): META_API_BASE_URL comes from the
  * credits dashboard, META_API_KEY is the key, META_MODEL is one model ID.
@@ -11,16 +11,27 @@
  * prompt already demands JSON only, and anything unparseable counts as a
  * format failure in the benchmark, which is itself a signal about the model.
  *
- * Safety, enforced here, not hoped for: screenForLLM runs FIRST and a
- * blocked email throws before any network call. The payload is the
- * minimized input (subject + first 1000 chars of body, no attachments).
- * Validation: the returned label must be one of the 8 taxonomy labels and
- * confidence must be a number from 0 to 1, or the call throws and the
- * scorer counts it as a failure. The model can never invent a label or
- * smuggle in an unusable confidence.
+ * Safety, enforced here in order, before any network call:
+ *  1. screenForLLM: blocked mail throws ("refused") and is never sent.
+ *  2. Category check: the rules label is computed locally, and only
+ *     generic template mail (see LLM_ELIGIBLE in safety.ts) proceeds.
+ *     Specific mail (interviews, offers, recruiter threads) and unknown
+ *     mail throw ("skipped") and never reach the network. The client can
+ *     therefore never leak a specific email, even by accident: the fetch
+ *     is unreachable for it.
+ * The payload is the minimized input (subject + first 1000 chars of body,
+ * no attachments). Validation: the returned label must be one of the 8
+ * taxonomy labels and confidence must be a number from 0 to 1, or the
+ * call throws and the scorer counts it as a failure. The model can never
+ * invent a label or smuggle in an unusable confidence.
  */
-import { LABELS, type Email, type Label } from "./rules.js";
-import { screenForLLM } from "./safety.js";
+import {
+  classifyByRules,
+  LABELS,
+  type Email,
+  type Label,
+} from "./rules.js";
+import { LLM_ELIGIBLE, screenForLLM } from "./safety.js";
 import { buildClassificationPrompt } from "./prompt.js";
 
 export interface LLMResult {
@@ -36,6 +47,12 @@ export function makeLlamaClassifier(model: string): LLMClassifier {
     const screen = screenForLLM(email);
     if (!screen.allowed) {
       throw new Error(`refused: ${screen.reason}`);
+    }
+    const rules = classifyByRules(email);
+    if (!(LLM_ELIGIBLE as readonly string[]).includes(rules.label)) {
+      throw new Error(
+        `skipped: ${rules.label} mail stays local (specific, never sent)`,
+      );
     }
     const base = process.env.META_API_BASE_URL;
     const key = process.env.META_API_KEY;

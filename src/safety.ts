@@ -17,6 +17,16 @@
  * tool can triage recruiter mail, the useful part, while that personal
  * information never leaves the machine.
  *
+ * Second boundary layer: which mail may reach an LLM at all. Generic
+ * template mail (application confirmations, form rejections, promos,
+ * newsletters) is bulk mail: it reveals nothing specific about the
+ * seeker's dealings, so it may be classified by a model and archived.
+ * Specific mail (interviews, offers, recruiter threads) carries the
+ * seeker's actual dealings: company names, roles, timing, people. That
+ * mail never leaves the machine: rules-only, label-only, zero API calls.
+ * Unknown mail ("none") also stays local: an unknown email might contain
+ * anything, so it is never sent to find out.
+ *
  * Deliberately NOT blocked: compensation/salary words. Offer mail routinely
  * mentions compensation, and triaging recruiter mail (including offers) is
  * the job this tool is for. The boundary is the mail TYPE (bank / gov /
@@ -33,7 +43,7 @@
  * mail, the golden set is eval-only, and the provider's current API data
  * terms must exclude training before any real mail is sent.
  */
-import type { Email } from "./rules.js";
+import type { Email, Label } from "./rules.js";
 
 export interface ScreenResult {
   allowed: boolean;
@@ -49,6 +59,25 @@ const SENSITIVE_PATTERNS: { name: string; pattern: RegExp }[] = [
   { name: "passport", pattern: /passport/i },
   { name: "date-of-birth", pattern: /date of birth/i },
   { name: "bank-account", pattern: /account\s+(ending|number)/i },
+];
+
+/**
+ * Which mail may reach an LLM at all (second boundary layer, see header).
+ * Generic template mail may be classified and archived; specific mail and
+ * unknown mail never leave the machine.
+ */
+export const LLM_ELIGIBLE: Label[] = [
+  "application",
+  "rejects",
+  "promos",
+  "read-later",
+];
+
+export const LOCAL_ONLY: Label[] = [
+  "interview",
+  "offer-process",
+  "recruiter/new",
+  "recruiter/replied",
 ];
 
 export function screenForLLM(email: Email): ScreenResult {
