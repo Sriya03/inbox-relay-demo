@@ -4,8 +4,8 @@
  * Same 8-label taxonomy as Relay, written fresh for this repo.
  * Rules run in precedence order (offer-process first, promos last) and the
  * first match wins. Anything with no match comes back as "none" at 0.4 —
- * the gate's "stays in inbox" case. The Llama classifier lands tomorrow
- * and the gate will require rules + LLM agreement at >= 0.85.
+ * the gate's "stays in inbox" case. The Llama classifier lives in llama.ts
+ * and the gate (rules + LLM agreement at >= 0.85) lives in gate.ts.
  */
 
 export const LABELS = [

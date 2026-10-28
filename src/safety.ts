@@ -9,6 +9,14 @@
  *  - Attachments: never fetched, never sent. The classifier only ever sees
  *    subject + trimmed body (see toLLMInput).
  *
+ * What sensitive information can a job-search inbox actually hold? Offer
+ * letters carry compensation. Background-check forms carry Social Security
+ * numbers and dates of birth. Immigration mail carries USCIS case numbers.
+ * Payroll and bank mail carry account details. A triager that sends mail to
+ * an LLM ships all of that to a third-party API. This screen exists so the
+ * tool can triage recruiter mail, the useful part, while that personal
+ * information never leaves the machine.
+ *
  * Deliberately NOT blocked: compensation/salary words. Offer mail routinely
  * mentions compensation, and triaging recruiter mail (including offers) is
  * the job this tool is for. The boundary is the mail TYPE (bank / gov /
