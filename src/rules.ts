@@ -26,6 +26,8 @@ export interface Email {
   from: string;
   subject: string;
   body: string;
+  /** Ground-truth label for the golden set ("blocked" = safety must refuse it). */
+  expected?: string;
 }
 
 export interface RuleResult {
