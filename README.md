@@ -84,10 +84,19 @@ LLM adds over rules alone. The scorer also proves the boundary: the 7
 local-only emails and the 2 blocked emails must show zero model calls,
 and any call on them counts as a failure.
 
-Status: the client, gate, and scorer are built. The benchmark run is
-pending (it needs a key and model IDs from the credits dashboard in
-`.env`); the table will be added here after the run. Nothing about the
-winner is claimed before it is measured.
+Status: benchmark run Oct 30. Both candidate models tied on the
+13-email generic set, so the pick is a tie-break, not a measured
+accuracy difference.
+
+| model | accuracy (generic) | conf. when right | conf. when wrong | failures | agrees with rules | gate archives @ precision | local (zero calls) | safety |
+| muse-wonder-1.0 | 13/13 (100%) | 0.99 | n/a (none wrong) | 0 | 13/13 | 13 @ 100% | 7/7 | 2/2 |
+| muse-spark-1.2 | 13/13 (100%) | 0.99 | n/a (none wrong) | 0 | 13/13 | 13 @ 100% | 7/7 | 2/2 |
+
+Rules baseline (no LLM): 13/13 correct on generic mail. Pick:
+muse-spark-1.2 — full tie on accuracy, calibration, and failures, so the
+smaller model wins by the tie-break rule. Scope: 13 emails is small
+(1 email ≈ 7–8 points), so this is directional, not a claim that one
+model is generally better.
 
 ## Labels
 
@@ -110,7 +119,7 @@ Other outcomes:
 - none: no rule matched; stays in the inbox (the honest "I don't know")
 - blocked: the safety screen refused it; never sent to any model
 
-## Status: what is actually in this repo (Oct 28)
+## Status: what is actually in this repo (Oct 30)
 
 Built and runnable right now:
 
@@ -130,15 +139,15 @@ Built and runnable right now:
   rejects/read-later/promos.
 
 Not in this repo: anything from Relay's codebase (nothing copied), any
-real mail, any credentials, any API keys. The benchmark table (which model
-won) lands here after the run.
+real mail, any credentials, any API keys. Benchmark run Oct 30 — table in
+'How Meta models are used' above.
 
 ## Disclosure (also the video's opening line)
 
 Pre-existing: Relay, my separate inbox triager (design only: the 8-label
 taxonomy and the rules + LLM agreement-gate idea). Built this week in this
 repo: synthetic data, rules baseline, safety screen, fixed prompt, Llama
-client, gate, scorer, CLI. Not yet run: the model benchmark. Relay lives
+client, gate, scorer, CLI. Run Oct 30: the model benchmark. Relay lives
 separately at https://github.com/Sriya03/inbox-relay: no code or git
 history from it is in this repo. This repo was created Oct 28, 2026, and
 its history starts that day.
@@ -170,7 +179,7 @@ npm run score          # benchmark every listed model, print the table
 
 ## What's next (planned, not done)
 
-1. Benchmark run, then the winner's table goes in this README.
+1. Benchmark run + winner's table in this README (done Oct 30).
 2. 2-minute demo video (opens with the disclosure line above, and answers
    the same questions as this README: the use, the guardrails, the models).
 3. Submit by Nov 4, 9:00 PM ET.
