@@ -180,7 +180,7 @@ npm run score          # benchmark every listed model, print the table
 ## What's next (planned, not done)
 
 1. Benchmark run + winner's table in this README (done Oct 30).
-2. 2-minute demo video (opens with the disclosure line above, and answers
+2. 3-minute demo video (opens with the disclosure line above, and answers
    the same questions as this README: the use, the guardrails, the models).
 3. Submit by Nov 4, 9:00 PM ET.
 
