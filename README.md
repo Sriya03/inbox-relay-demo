@@ -106,17 +106,22 @@ Status: benchmark run Nov 2. Both candidate models tied on the
 confidence and size, not a measured accuracy difference.
 
 | model | accuracy (generic) | conf. when right | conf. when wrong | failures | agrees with rules | gate archives @ precision | local (zero calls) | safety |
-| muse-wonder-1.0 | 19/32 (59%) | 0.96 | n/a (13 format failures, no valid wrong predictions) | 13 | 19/19 | 18 @ 100% | 33/33 | 2/2 |
-| muse-spark-1.2 | 19/32 (59%) | 0.98 | n/a (13 format failures, no valid wrong predictions) | 13 | 19/19 | 19 @ 100% | 33/33 | 2/2 |
+| muse-wonder-1.0 | 19/32 (59%) | 0.96 | n/a (13 skipped, no valid wrong predictions) | 13 | 19/19 | 18 @ 100% | 33/33 | 2/2 |
+| muse-spark-1.2 | 19/32 (59%) | 0.98 | n/a (13 skipped, no valid wrong predictions) | 13 | 19/19 | 19 @ 100% | 33/33 | 2/2 |
 
 Rules baseline (no LLM): 19/32 correct on generic mail. Pick:
 muse-spark-1.2 — tied on generic accuracy (19/32) and failures (13),
 higher confidence when right (0.98 vs 0.96), and the smaller model
 wins a tie. Scope: 32 emails is still small (1 email ≈ 3 points), so
 this is directional, not a claim that one model is generally better.
-Note: both models failed to produce valid output on 13/32 harder
-emails (format failures) — the harder set exposed output fragility,
-not just lower accuracy; the gate held at 100% precision on both.
+Correction (new run, dafeb98): the 13 are NOT format failures.
+Per-email reporting shows all 13 were skipped: the rules labeled
+generic mail as local-only (11 as none, 2 as recruiter/new), so the
+LLM was never called on them — the scorer counted skips as failures.
+The models produced valid output on all 19 they were called on
+(19/19, 0 valid-wrong), and repair rescued 0 because nothing was
+malformed. The harder set exposed rules fragility (rules miss generic
+mail), not model output fragility; the gate held at 100% precision on both.
 
 Separately, dry-run on 30 real inbox emails (nothing applied, nothing recorded):
 gate agreed 21 archive / 9 stays, rules–LLM agreement 21/23, 0 failures,
