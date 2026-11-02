@@ -210,6 +210,23 @@ npm run score          # benchmark every listed model, print the table
    the same questions as this README: the use, the guardrails, the models).
 3. Submit by Nov 4, 9:00 PM ET.
 
+## Future work: from demo to production
+
+This demo proves the gate and the safety boundary on synthetic mail. It is not
+production. To get there: (1) a real-mail golden set (100–200 labeled emails,
+stratified, with a held-out test split) and per-label metrics with error analysis;
+(2) output robustness — JSON mode, retry, and repair — to eliminate format
+failures, then a local classifier (embeddings + logistic regression, local-only)
+compared against LLM and rules on dev, with the gate threshold swept on data
+instead of asserted; (3) safety hardening — explicit domain allow/block lists
+instead of substring matching, PII redaction on generic payloads, an audit log
+with undo for archives, and a provider training-terms check before any real mail
+is sent; (4) a ship loop — shadow mode, then label-only, then archive promos
+only, then archive all agreed — with monitoring (none-rate, disagreement-rate,
+archive precision, drift) and versioned rules, prompt, and threshold
+regression-checked on test before every change; (5) tests for rules, safety,
+gate, and scorer, CI, and the tie-break rule enforced in code.
+
 ## License
 
 MIT: see LICENSE.
