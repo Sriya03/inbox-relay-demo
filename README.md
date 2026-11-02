@@ -12,7 +12,7 @@ hours a week.
 
 This demo labels every email and drafts a reply where one is needed, so the
 seeker can spot interviews and offers at a glance and answer in minutes. It
-is a command-line demo on 22 synthetic emails: rules label them, a safety
+is a command-line demo on 67 synthetic emails: rules label them, a safety
 screen checks them, and (with a key) Llama models classify the generic
 ones behind an agreement gate.
 
@@ -73,30 +73,33 @@ the rules; they cover what the rules miss on the bulk mail, and the gate
 keeps them honest.
 
 Best is not picked on vibes. Every candidate model runs over the same
-generic golden set (13 emails) with the same fixed prompt (temperature 0,
+generic golden set (32 emails) with the same fixed prompt (temperature 0,
 JSON-only output), and the scorer prints one table: accuracy, confidence
 when right vs wrong (calibration), format failures, agreement with the
 rules, and gate archive precision. The winner is the highest accuracy,
 then the best calibration, then the fewest format failures. If a smaller
 model ties a bigger one, the smaller one wins: same score, less to run.
 The rules baseline is printed alongside, so you can see exactly what the
-LLM adds over rules alone. The scorer also proves the boundary: the 7
+LLM adds over rules alone. The scorer also proves the boundary: the 33
 local-only emails and the 2 blocked emails must show zero model calls,
 and any call on them counts as a failure.
 
-Status: benchmark run Oct 30. Both candidate models tied on the
-13-email generic set, so the pick is a tie-break, not a measured
-accuracy difference.
+Status: benchmark run Nov 2. Both candidate models tied on the
+32-email generic set (19/32 each), so the pick is a tie-break on
+confidence and size, not a measured accuracy difference.
 
 | model | accuracy (generic) | conf. when right | conf. when wrong | failures | agrees with rules | gate archives @ precision | local (zero calls) | safety |
-| muse-wonder-1.0 | 13/13 (100%) | 0.99 | n/a (none wrong) | 0 | 13/13 | 13 @ 100% | 7/7 | 2/2 |
-| muse-spark-1.2 | 13/13 (100%) | 0.99 | n/a (none wrong) | 0 | 13/13 | 13 @ 100% | 7/7 | 2/2 |
+| muse-wonder-1.0 | 19/32 (59%) | 0.96 | n/a (13 format failures, no valid wrong predictions) | 13 | 19/19 | 18 @ 100% | 33/33 | 2/2 |
+| muse-spark-1.2 | 19/32 (59%) | 0.98 | n/a (13 format failures, no valid wrong predictions) | 13 | 19/19 | 19 @ 100% | 33/33 | 2/2 |
 
-Rules baseline (no LLM): 13/13 correct on generic mail. Pick:
-muse-spark-1.2 — full tie on accuracy, calibration, and failures, so the
-smaller model wins by the tie-break rule. Scope: 13 emails is small
-(1 email ≈ 7–8 points), so this is directional, not a claim that one
-model is generally better.
+Rules baseline (no LLM): 19/32 correct on generic mail. Pick:
+muse-spark-1.2 — tied on generic accuracy (19/32) and failures (13),
+higher confidence when right (0.98 vs 0.96), and the smaller model
+wins a tie. Scope: 32 emails is still small (1 email ≈ 3 points), so
+this is directional, not a claim that one model is generally better.
+Note: both models failed to produce valid output on 13/32 harder
+emails (format failures) — the harder set exposed output fragility,
+not just lower accuracy; the gate held at 100% precision on both.
 
 ## Labels
 
@@ -119,11 +122,11 @@ Other outcomes:
 - none: no rule matched; stays in the inbox (the honest "I don't know")
 - blocked: the safety screen refused it; never sent to any model
 
-## Status: what is actually in this repo (Oct 30)
+## Status: what is actually in this repo (Nov 2)
 
 Built and runnable right now:
 
-- `data/synthetic-emails.json`: 22 invented emails, each with an `expected`
+- `data/synthetic-emails.json`: 67 invented emails, each with an `expected`
   label (the ground truth for scoring).
 - `src/rules.ts`: first-match rules over the 8-label taxonomy.
 - `src/safety.ts`: the two boundary layers described above.
@@ -139,7 +142,7 @@ Built and runnable right now:
   rejects/read-later/promos.
 
 Not in this repo: anything from Relay's codebase (nothing copied), any
-real mail, any credentials, any API keys. Benchmark run Oct 30 — table in
+real mail, any credentials, any API keys. Benchmark run Nov 2 — table in
 'How Meta models are used' above.
 
 ## Disclosure (also the video's opening line)
@@ -147,7 +150,7 @@ real mail, any credentials, any API keys. Benchmark run Oct 30 — table in
 Pre-existing: Relay, my separate inbox triager (design only: the 8-label
 taxonomy and the rules + LLM agreement-gate idea). Built this week in this
 repo: synthetic data, rules baseline, safety screen, fixed prompt, Llama
-client, gate, scorer, CLI. Run Oct 30: the model benchmark. Relay lives
+client, gate, scorer, CLI. Run Nov 2: the model benchmark. Relay lives
 separately at https://github.com/Sriya03/inbox-relay: no code or git
 history from it is in this repo. This repo was created Oct 28, 2026, and
 its history starts that day.
@@ -167,8 +170,8 @@ npm run build
 npm run demo    # offline: rules + safety + drafts, zero API calls
 ```
 
-Demo output: 22 emails. 13 generic ones read "not called in demo mode";
-6 specific ones read "never sent (specific mail stays local)"; 1 unknown
+Demo output: 67 emails. 32 generic ones read "not called in demo mode";
+32 specific ones read "never sent (specific mail stays local)"; 1 unknown
 reads "never sent (unknown mail stays local)"; 2 blocked ones read "LLM
 skipped (sensitive — never sent)".
 
@@ -179,7 +182,7 @@ npm run score          # benchmark every listed model, print the table
 
 ## What's next (planned, not done)
 
-1. Benchmark run + winner's table in this README (done Oct 30).
+1. Benchmark run + winner's table in this README (done Nov 2, re-run on the 67-email set).
 2. 3-minute demo video (opens with the disclosure line above, and answers
    the same questions as this README: the use, the guardrails, the models).
 3. Submit by Nov 4, 9:00 PM ET.
