@@ -101,6 +101,12 @@ Note: both models failed to produce valid output on 13/32 harder
 emails (format failures) — the harder set exposed output fragility,
 not just lower accuracy; the gate held at 100% precision on both.
 
+Separately, dry-run on 30 real inbox emails (nothing applied, nothing recorded):
+gate agreed 21 archive / 9 stays, rules–LLM agreement 21/23, 0 failures,
+0 LLM calls on local/blocked mail. Sample was promo-heavy (23 promos, no
+interview/offer mail) — the local-only branch was proven on unknown mail,
+not on interview/offer mail.
+
 ## Labels
 
 LLM-eligible (generic template mail, may reach a model and be archived):
