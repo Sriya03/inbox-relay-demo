@@ -55,7 +55,7 @@ network call:
    Unknown mail also stays local: an unknown email might contain anything,
    so it is never sent to find out.
 
-Payloads for the mail that does go to a model are minimized: subject +
+Payloads for the mail that does go to a model are minimized: sender + subject +
 first 1000 chars of body, no attachments, no full threads. And the demo
 data is synthetic: no real mail, no credentials, no API keys anywhere in
 this repo or its history.
@@ -64,6 +64,23 @@ The guardrails are what let this tool graduate from a demo to a real
 inbox. Without them, running it on real mail would leak personal
 information. With them, the useful part (triaging recruiter mail) works
 while the personal part never leaves the machine.
+
+## Privacy: what Relay does that a general Gmail MCP doesn't
+
+| | General Gmail MCP | Relay (this repo) |
+|---|---|---|
+| What reaches the model | Full mail content the tool returns | Generic template mail only; specific mail throws before any network call |
+| Who decides an archive | A single model call | Rules + model must agree, and confidence ≥ 0.85, or it stays |
+| Interview / offer mail | Treated like any other mail | Never auto-archived, ever (label-only) |
+| Third parties that see your mail | The MCP proxy (which logs payloads by default) plus the model provider | No proxy; direct Gmail OAuth, local token, model sees generic mail only |
+| Proof specific mail stayed local | Usually a claim | A test: `npm run score` verifies 33/33 local + 2/2 blocked had zero model calls |
+| Public artifacts | Often demo on real mail | Synthetic only; real-mail claims are aggregate counts, never content |
+| Sending | Often sends on the model's say-so | Drafts only; nothing auto-sends |
+
+Relay's Gmail scope is `gmail.modify` (label/archive, not permanent delete, not full
+`mail.google.com` access). Its token is local-only, 0600, gitignored. Every gate
+decision carries a reason string, so an archive is explainable — and a Gmail
+archive is reversible, not a delete.
 
 ## How Meta models are used, and which one is best
 
