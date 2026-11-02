@@ -1,1 +1,471 @@
-[{"body":"Hi! We'd love to invite you for a technical interview for the Frontend Engineer role. Are you available next week for a 60-minute round with the team?","expected":"interview","from":"recruiting@northwind.example","id":"syn-01","subject":"Interview invitation — Frontend Engineer @ Northwind Labs"},{"body":"Hi, I'm a recruiter at BluePeak Systems. Would you be open to a 30-min phone screen about a backend role on our platform team?","expected":"interview","from":"sara@bluepeak.example","id":"syn-02","subject":"Quick phone screen this week?"},{"body":"We are pleased to offer you the Software Engineer role. Your compensation package is attached, along with next steps for the background check.","expected":"offer-process","from":"offers@helios.example","id":"syn-03","subject":"Offer letter — Software Engineer @ Helios Health"},{"body":"Unfortunately, we've decided to move forward with other candidates for this role. Thank you for your time and interest.","expected":"rejects","from":"recruiting@northwind.example","id":"syn-04","subject":"Update on your application — Northwind Labs"},{"body":"After careful consideration, we won't be moving forward with your application. We appreciated learning about your work and wish you the best.","expected":"rejects","from":"hiring@bluepeak.example","id":"syn-05","subject":"Thanks for interviewing at BluePeak"},{"body":"Hi, I came across your profile and wanted to reach out about a founding engineer role at Lumen AI. Would you be open to a quick chat?","expected":"recruiter/new","from":"alex@lumen.example","id":"syn-06","subject":"Opportunity: Founding Engineer @ Lumen AI"},{"body":"We're hiring for a backend SDE II role, fully remote. The team works on developer tooling. Interested in hearing more?","expected":"recruiter/new","from":"talent@ferrous.example","id":"syn-07","subject":"SDE II role — remote"},{"body":"Thanks for the reply! Are you free Thursday for a quick chat about the role and the team?","expected":"recruiter/replied","from":"talent@ferrous.example","id":"syn-08","subject":"Re: SDE II role — remote"},{"body":"We received your application for the Software Engineer role. Our team will review it and follow up about next steps.","expected":"application","from":"noreply@helios.example","id":"syn-09","subject":"Application received — Helios Health"},{"body":"A roundup of posts on agents, evals, and production LLM systems from the past week. Read it when you have a quiet hour.","expected":"read-later","from":"digest@aidev.example","id":"syn-10","subject":"This week in AI engineering (newsletter)"},{"body":"Use code LEARN50 for 50% off the full course. This offer ends Sunday. Unsubscribe here if you no longer want these emails.","expected":"promos","from":"learn@coursehub.example","id":"syn-11","subject":"50% off our System Design course — ends Sunday"},{"body":"Hi, hope you're doing well — wanted to ask you something when you have a minute. Let me know a good time to connect.","expected":"none","from":"jordan@somewhere.example","id":"syn-12","subject":"Quick question"},{"body":"Your checking account ending 4821 has a new statement. Log in to view it.","expected":"blocked","from":"alerts@metrobank.example","id":"syn-13","subject":"Your monthly statement is ready"},{"body":"Your case IOE1234567890 has a new status update. Sign in to view details.","expected":"blocked","from":"uscis@uscis.example","id":"syn-14","subject":"Case status update"},{"body":"Unfortunately, we have decided not to move forward with your application at this time. Thank you for your interest.","expected":"rejects","from":"recruiting@ferrous.example","id":"syn-15","subject":"Update on your application"},{"body":"After careful review, we won't be moving forward with your candidacy. We wish you the best in your search.","expected":"rejects","from":"hiring@northwind.example","id":"syn-16","subject":"Application update"},{"body":"Thank you for taking the time to interview. We have decided to move forward with other candidates for this role.","expected":"rejects","from":"careers@lumen.example","id":"syn-17","subject":"Thank you for applying"},{"body":"We received your application for the Backend Engineer role. Our team will review it and be in touch about next steps.","expected":"application","from":"noreply@ferrous.example","id":"syn-18","subject":"Application received"},{"body":"Application received: thank you for applying to the Product Engineer role. We will follow up if there is a fit.","expected":"application","from":"noreply@bluepeak.example","id":"syn-19","subject":"Thanks for applying"},{"body":"Get 20% off every course this week, plus a free ebook. Unsubscribe any time.","expected":"promos","from":"deals@coursehub.example","id":"syn-20","subject":"20% off all courses this week"},{"body":"Upgrade to premium job alerts at a 50% discount this month only. Unsubscribe here.","expected":"promos","from":"hello@jobboard.example","id":"syn-21","subject":"Premium job alerts, 50% off"},{"body":"This week's digest: five articles on system design, evals, and shipping AI features. Read them when you have a quiet hour.","expected":"read-later","from":"digest@devweekly.example","id":"syn-22","subject":"Dev Weekly digest"}]
+[
+  {
+    "body": "Hi! We'd love to invite you for a technical interview for the Frontend Engineer role. Are you available next week for a 60-minute round with the team?",
+    "expected": "interview",
+    "from": "recruiting@northwind.example",
+    "id": "syn-01",
+    "subject": "Interview invitation \u2014 Frontend Engineer @ Northwind Labs"
+  },
+  {
+    "body": "Hi, I'm a recruiter at BluePeak Systems. Would you be open to a 30-min phone screen about a backend role on our platform team?",
+    "expected": "interview",
+    "from": "sara@bluepeak.example",
+    "id": "syn-02",
+    "subject": "Quick phone screen this week?"
+  },
+  {
+    "body": "We are pleased to offer you the Software Engineer role. Your compensation package is attached, along with next steps for the background check.",
+    "expected": "offer-process",
+    "from": "offers@helios.example",
+    "id": "syn-03",
+    "subject": "Offer letter \u2014 Software Engineer @ Helios Health"
+  },
+  {
+    "body": "Unfortunately, we've decided to move forward with other candidates for this role. Thank you for your time and interest.",
+    "expected": "rejects",
+    "from": "recruiting@northwind.example",
+    "id": "syn-04",
+    "subject": "Update on your application \u2014 Northwind Labs"
+  },
+  {
+    "body": "After careful consideration, we won't be moving forward with your application. We appreciated learning about your work and wish you the best.",
+    "expected": "rejects",
+    "from": "hiring@bluepeak.example",
+    "id": "syn-05",
+    "subject": "Thanks for interviewing at BluePeak"
+  },
+  {
+    "body": "Hi, I came across your profile and wanted to reach out about a founding engineer role at Lumen AI. Would you be open to a quick chat?",
+    "expected": "recruiter/new",
+    "from": "alex@lumen.example",
+    "id": "syn-06",
+    "subject": "Opportunity: Founding Engineer @ Lumen AI"
+  },
+  {
+    "body": "We're hiring for a backend SDE II role, fully remote. The team works on developer tooling. Interested in hearing more?",
+    "expected": "recruiter/new",
+    "from": "talent@ferrous.example",
+    "id": "syn-07",
+    "subject": "SDE II role \u2014 remote"
+  },
+  {
+    "body": "Thanks for the reply! Are you free Thursday for a quick chat about the role and the team?",
+    "expected": "recruiter/replied",
+    "from": "talent@ferrous.example",
+    "id": "syn-08",
+    "subject": "Re: SDE II role \u2014 remote"
+  },
+  {
+    "body": "We received your application for the Software Engineer role. Our team will review it and follow up about next steps.",
+    "expected": "application",
+    "from": "noreply@helios.example",
+    "id": "syn-09",
+    "subject": "Application received \u2014 Helios Health"
+  },
+  {
+    "body": "A roundup of posts on agents, evals, and production LLM systems from the past week. Read it when you have a quiet hour.",
+    "expected": "read-later",
+    "from": "digest@aidev.example",
+    "id": "syn-10",
+    "subject": "This week in AI engineering (newsletter)"
+  },
+  {
+    "body": "Use code LEARN50 for 50% off the full course. This offer ends Sunday. Unsubscribe here if you no longer want these emails.",
+    "expected": "promos",
+    "from": "learn@coursehub.example",
+    "id": "syn-11",
+    "subject": "50% off our System Design course \u2014 ends Sunday"
+  },
+  {
+    "body": "Hi, hope you're doing well \u2014 wanted to ask you something when you have a minute. Let me know a good time to connect.",
+    "expected": "none",
+    "from": "jordan@somewhere.example",
+    "id": "syn-12",
+    "subject": "Quick question"
+  },
+  {
+    "body": "Your checking account ending 4821 has a new statement. Log in to view it.",
+    "expected": "blocked",
+    "from": "alerts@metrobank.example",
+    "id": "syn-13",
+    "subject": "Your monthly statement is ready"
+  },
+  {
+    "body": "Your case IOE1234567890 has a new status update. Sign in to view details.",
+    "expected": "blocked",
+    "from": "uscis@uscis.example",
+    "id": "syn-14",
+    "subject": "Case status update"
+  },
+  {
+    "body": "Unfortunately, we have decided not to move forward with your application at this time. Thank you for your interest.",
+    "expected": "rejects",
+    "from": "recruiting@ferrous.example",
+    "id": "syn-15",
+    "subject": "Update on your application"
+  },
+  {
+    "body": "After careful review, we won't be moving forward with your candidacy. We wish you the best in your search.",
+    "expected": "rejects",
+    "from": "hiring@northwind.example",
+    "id": "syn-16",
+    "subject": "Application update"
+  },
+  {
+    "body": "Thank you for taking the time to interview. We have decided to move forward with other candidates for this role.",
+    "expected": "rejects",
+    "from": "careers@lumen.example",
+    "id": "syn-17",
+    "subject": "Thank you for applying"
+  },
+  {
+    "body": "We received your application for the Backend Engineer role. Our team will review it and be in touch about next steps.",
+    "expected": "application",
+    "from": "noreply@ferrous.example",
+    "id": "syn-18",
+    "subject": "Application received"
+  },
+  {
+    "body": "Application received: thank you for applying to the Product Engineer role. We will follow up if there is a fit.",
+    "expected": "application",
+    "from": "noreply@bluepeak.example",
+    "id": "syn-19",
+    "subject": "Thanks for applying"
+  },
+  {
+    "body": "Get 20% off every course this week, plus a free ebook. Unsubscribe any time.",
+    "expected": "promos",
+    "from": "deals@coursehub.example",
+    "id": "syn-20",
+    "subject": "20% off all courses this week"
+  },
+  {
+    "body": "Upgrade to premium job alerts at a 50% discount this month only. Unsubscribe here.",
+    "expected": "promos",
+    "from": "hello@jobboard.example",
+    "id": "syn-21",
+    "subject": "Premium job alerts, 50% off"
+  },
+  {
+    "body": "This week's digest: five articles on system design, evals, and shipping AI features. Read them when you have a quiet hour.",
+    "expected": "read-later",
+    "from": "digest@devweekly.example",
+    "id": "syn-22",
+    "subject": "Dev Weekly digest"
+  },
+  {
+    "id": "hard-01",
+    "from": "hiring@northwind.example",
+    "subject": "Closing the loop \u2014 Backend Engineer",
+    "body": "Hi, thank you for meeting the team and for the work sample. After the final round, the hiring group has chosen to go in another direction for this seat. Grateful for your time, and wishing you well in your search.",
+    "expected": "rejects"
+  },
+  {
+    "id": "hard-02",
+    "from": "recruiting@ferrous.example",
+    "subject": "Update on the Platform Engineer role",
+    "body": "Hi, thanks for your patience through the process. We have closed this req for now and will not be continuing with your candidacy. We appreciated learning about your work and wish you the best.",
+    "expected": "rejects"
+  },
+  {
+    "id": "hard-03",
+    "from": "careers@lumen.example",
+    "subject": "Next steps",
+    "body": "Hi, while your background is strong, the team is pausing hiring for this role and won't be able to continue the process at this time. Thank you for the time you gave us.",
+    "expected": "rejects"
+  },
+  {
+    "id": "hard-04",
+    "from": "noreply@helios.example",
+    "subject": "Thanks \u2014 Platform Engineer",
+    "body": "Hi, thanks for submitting. We've got your materials for the Platform Engineer role and a reviewer will take a look in the coming days. We'll be in touch if there's a fit.",
+    "expected": "application"
+  },
+  {
+    "id": "hard-05",
+    "from": "noreply@bluepeak.example",
+    "subject": "In review \u2014 Data Engineer",
+    "body": "Hi, your submission for the Data Engineer role is now with the hiring team. Thanks for applying \u2014 we'll follow up if we want to move to a conversation.",
+    "expected": "application"
+  },
+  {
+    "id": "hard-06",
+    "from": "noreply@ferrous.example",
+    "subject": "Application confirmed \u2014 plus a resume review offer",
+    "body": "We received your application for the Backend Engineer role. Our team will review it and be in touch about next steps. Separately, get 20% off a resume review this week. Unsubscribe any time.",
+    "expected": "application"
+  },
+  {
+    "id": "hard-07",
+    "from": "hello@jobboard.example",
+    "subject": "Update on your job search",
+    "body": "New roles matching your profile are live this week. Upgrade to premium alerts at 50% off this month only. Unsubscribe here if you no longer want these emails.",
+    "expected": "promos"
+  },
+  {
+    "id": "hard-08",
+    "from": "hello@jobboard.example",
+    "subject": "Your application profile is now eligible for priority placement",
+    "body": "Complete your profile to unlock priority placement in recruiter searches. Premium is 50% off this month only. Unsubscribe any time.",
+    "expected": "promos"
+  },
+  {
+    "id": "hard-09",
+    "from": "learn@coursehub.example",
+    "subject": "Your interview prep plan is ready",
+    "body": "Your interview prep plan is ready \u2014 get 50% off our system design course, ends Sunday. Work through the modules at your own pace. Unsubscribe here.",
+    "expected": "promos"
+  },
+  {
+    "id": "hard-10",
+    "from": "digest@aidev.example",
+    "subject": "This week: engineers we're watching",
+    "body": "A roundup of posts on agents and evals, plus three teams hiring this month. This digest is a read for a quiet hour \u2014 no action needed.",
+    "expected": "read-later"
+  },
+  {
+    "id": "hard-11",
+    "from": "digest@devweekly.example",
+    "subject": "Recording: Tuesday's talk on retrieval evals",
+    "body": "The recording of Tuesday's talk on retrieval evals is up, with notes and links. Watch when you have time \u2014 a 40-minute watch, no reply needed.",
+    "expected": "read-later"
+  },
+  {
+    "id": "hard-12",
+    "from": "jordan@somewhere.example",
+    "subject": "Forwarded: notes on building eval harnesses",
+    "body": "Forwarding a long-form essay on building eval harnesses \u2014 a 20-minute read on scoring, golden sets, and calibration. Worth saving for the weekend.",
+    "expected": "read-later"
+  },
+  {
+    "id": "var-01",
+    "from": "portal@copperline.example",
+    "subject": "Your application status changed \u2014 Backend Engineer",
+    "body": "Hi, your application for the Backend Engineer role has moved to Under Review. The hiring team will reach out if they'd like to schedule a conversation. You can check your portal for updates.",
+    "expected": "application"
+  },
+  {
+    "id": "var-02",
+    "from": "noreply@hireloop.example",
+    "subject": "Application confirmed \u2014 Data Engineer (Ref HL-4821)",
+    "body": "Hi, this confirms your application for the Data Engineer role via HireLoop. Reference HL-4821. The employer will review your profile and follow up if there's a fit.",
+    "expected": "application"
+  },
+  {
+    "id": "var-03",
+    "from": "events@coursehub.example",
+    "subject": "Free live workshop: System design for interviews",
+    "body": "Join us Thursday for a free live workshop on system design for interviews, with Q&A at the end. Reserve your seat \u2014 spots fill fast.",
+    "expected": "promos"
+  },
+  {
+    "id": "var-04",
+    "from": "hello@jobboard.example",
+    "subject": "New: salary insights for your role",
+    "body": "We've launched salary insights \u2014 see what engineers at your level are earning, plus new filters for remote roles. Try it free this week.",
+    "expected": "promos"
+  },
+  {
+    "id": "var-05",
+    "from": "blog@aidev.example",
+    "subject": "A deep dive on retrieval evals",
+    "body": "A single long-form piece on how to evaluate retrieval: chunking, metrics, and failure modes, with examples. Worth a slow read when you have an hour.",
+    "expected": "read-later"
+  },
+  {
+    "id": "var-06",
+    "from": "podcast@devweekly.example",
+    "subject": "New episode: shipping agents to production",
+    "body": "This week's episode covers shipping agents to production \u2014 evals, rollbacks, and what breaks first. 45 minutes, listen when you're out for a walk.",
+    "expected": "read-later"
+  },
+  {
+    "id": "var-07",
+    "from": "talks@aidev.example",
+    "subject": "Talk video: lessons from a year of LLM apps",
+    "body": "The video from last month's summit talk is up, with slides attached. A 30-minute watch on what actually worked in production LLM apps.",
+    "expected": "read-later"
+  },
+  {
+    "id": "var-08",
+    "from": "recruiting@meridian.example",
+    "subject": "Onsite loop invitation \u2014 Frontend Engineer",
+    "body": "Hi, we'd like to invite you to a full-day onsite loop for the Frontend Engineer role: four rounds with the team, plus lunch. Are you available next Friday? We'll share the schedule once you confirm.",
+    "expected": "interview"
+  },
+  {
+    "id": "var-09",
+    "from": "recruiting@northwind.example",
+    "subject": "Can we move Thursday's interview?",
+    "body": "Hi, something came up on our side \u2014 can we move Thursday's interview to Friday at the same time? Sorry for the shuffle, and let me know what works.",
+    "expected": "interview"
+  },
+  {
+    "id": "var-10",
+    "from": "recruiting@quartz.example",
+    "subject": "Take-home exercise before your next round",
+    "body": "Hi, before your next round we'd like you to complete a short take-home exercise \u2014 about 90 minutes, no trick questions. Please send it back by Wednesday and we'll schedule the review.",
+    "expected": "interview"
+  },
+  {
+    "id": "var-11",
+    "from": "recruiting@bluepeak.example",
+    "subject": "Your interview panel \u2014 Backend Engineer",
+    "body": "Hi, confirming your interview next Tuesday. Your panel: two engineers and the hiring manager, 60 minutes each. We'll send the video link the morning of.",
+    "expected": "interview"
+  },
+  {
+    "id": "var-12",
+    "from": "recruiting@ferrous.example",
+    "subject": "Confirmed: phone screen Tuesday 2 PM",
+    "body": "Hi, confirming our phone screen for Tuesday at 2 PM. We'll call you at the number on file \u2014 no prep needed, just a conversation about your background and the role.",
+    "expected": "interview"
+  },
+  {
+    "id": "var-13",
+    "from": "sara@bluepeak.example",
+    "subject": "Round 2 \u2014 let's get it scheduled",
+    "body": "Hi, great news \u2014 you cleared round 1. Let's get round 2 scheduled for next week. What days work for you? It'll be a system design round with the team.",
+    "expected": "interview"
+  },
+  {
+    "id": "var-14",
+    "from": "offers@meridian.example",
+    "subject": "Following up on today's offer conversation",
+    "body": "Hi, great speaking today. Confirming what we discussed: the Software Engineer role, starting next month, with the package we walked through. The formal letter follows by email.",
+    "expected": "offer-process"
+  },
+  {
+    "id": "var-15",
+    "from": "offers@helios.example",
+    "subject": "Please confirm by Friday \u2014 offer for Data Engineer",
+    "body": "Hi, we'd love to have you join as Data Engineer. Please confirm your acceptance by Friday so we can hold the seat and start the onboarding paperwork.",
+    "expected": "offer-process"
+  },
+  {
+    "id": "var-16",
+    "from": "offers@quartz.example",
+    "subject": "Re: compensation \u2014 updated terms",
+    "body": "Hi, thanks for sharing your expectations. We can move the base to $145,000 and add a sign-on. Let us know if that works and we'll update the letter.",
+    "expected": "offer-process"
+  },
+  {
+    "id": "var-17",
+    "from": "offers@northwind.example",
+    "subject": "Next step: background check",
+    "body": "Hi, as a next step after your offer, we'll kick off a background check. You'll get a separate email with a link to authorize it \u2014 it usually takes a few days.",
+    "expected": "offer-process"
+  },
+  {
+    "id": "var-18",
+    "from": "offers@ferrous.example",
+    "subject": "Your start date and onboarding plan",
+    "body": "Hi, welcome aboard! Your start date is Monday the 12th. Here's your onboarding plan: laptop setup, team intros, and your first-week schedule. Reach out with any questions.",
+    "expected": "offer-process"
+  },
+  {
+    "id": "var-19",
+    "from": "offers@lumen.example",
+    "subject": "30 minutes to walk through the offer?",
+    "body": "Hi, before we send the formal letter, let's find 30 minutes to walk through the offer together \u2014 role, comp, and start date \u2014 so there are no surprises.",
+    "expected": "offer-process"
+  },
+  {
+    "id": "var-20",
+    "from": "offers@bluepeak.example",
+    "subject": "Your benefits package \u2014 Software Engineer",
+    "body": "Hi, attached is a summary of your benefits package: health, dental, vision, and time off, plus the retirement plan details. Let us know if you have questions before you decide.",
+    "expected": "offer-process"
+  },
+  {
+    "id": "var-21",
+    "from": "james@talentpartners.example",
+    "subject": "Client role: Staff Backend Engineer (agency)",
+    "body": "Hi, I'm with Talent Partners, an agency. A client of ours is hiring a Staff Backend Engineer for their platform team, remote-first. Would you be open to hearing more?",
+    "expected": "recruiter/new"
+  },
+  {
+    "id": "var-22",
+    "from": "alerts@jobboard.example",
+    "subject": "A role matching your profile: ML Platform Engineer",
+    "body": "A new role matching your profile just posted: ML Platform Engineer, remote, at a Series B startup. View the posting and apply if it fits.",
+    "expected": "recruiter/new"
+  },
+  {
+    "id": "var-23",
+    "from": "priya@solace.example",
+    "subject": "Referred by Maya \u2014 Engineering Manager role",
+    "body": "Hi, Maya suggested I reach out. We're hiring an Engineering Manager for our infra team and she thought your background could be a fit. Open to a quick chat?",
+    "expected": "recruiter/new"
+  },
+  {
+    "id": "var-24",
+    "from": "dan@fieldstone.example",
+    "subject": "Directly from the hiring manager \u2014 Platform Lead",
+    "body": "Hi, I'm the hiring manager for our Platform team, reaching out directly. We're hiring a Platform Lead and your work stood out. Would you be open to talking?",
+    "expected": "recruiter/new"
+  },
+  {
+    "id": "var-25",
+    "from": "talent@ember.example",
+    "subject": "6-month contract: Frontend Engineer",
+    "body": "Hi, we have a 6-month contract opening for a Frontend Engineer, remote, starting next month. The team works on customer-facing tools. Interested in contract work?",
+    "expected": "recruiter/new"
+  },
+  {
+    "id": "var-26",
+    "from": "alex@lumen.example",
+    "subject": "Bumping this up \u2014 Founding Engineer @ Lumen AI",
+    "body": "Hi, bumping my earlier note about the Founding Engineer role at Lumen AI. No worries if the timing isn't right \u2014 just wanted to make sure you saw it.",
+    "expected": "recruiter/new"
+  },
+  {
+    "id": "var-27",
+    "from": "talent@ferrous.example",
+    "subject": "Re: SDE II role \u2014 remote",
+    "body": "Hi, thanks for getting back to me! Here's the full job description and the team overview. Let me know what you think and we can set up a call.",
+    "expected": "recruiter/replied"
+  },
+  {
+    "id": "var-28",
+    "from": "talent@ferrous.example",
+    "subject": "Re: SDE II role \u2014 calendar hold for Thursday",
+    "body": "Hi, you mentioned Thursday works \u2014 I've put a calendar hold for Thursday at 3 PM for our chat. Let me know if that time still works for you.",
+    "expected": "recruiter/replied"
+  },
+  {
+    "id": "var-29",
+    "from": "sara@bluepeak.example",
+    "subject": "Re: backend role \u2014 comp and remote details",
+    "body": "Hi, good questions. On comp: the range is competitive for the level, and the role is fully remote. Happy to share more on the call \u2014 what else would help you decide?",
+    "expected": "recruiter/replied"
+  },
+  {
+    "id": "var-30",
+    "from": "alex@lumen.example",
+    "subject": "Re: Founding Engineer @ Lumen AI",
+    "body": "Hi, the hiring manager liked your background. Let's set up a screen next week \u2014 are you free Tuesday or Wednesday afternoon?",
+    "expected": "recruiter/replied"
+  },
+  {
+    "id": "var-31",
+    "from": "talent@ferrous.example",
+    "subject": "Re: SDE II role \u2014 what to expect",
+    "body": "Hi, since you asked: the process is a recruiter screen, then a technical round, then a team chat. No take-home. I can share prep notes if helpful.",
+    "expected": "recruiter/replied"
+  },
+  {
+    "id": "var-32",
+    "from": "alex@lumen.example",
+    "subject": "Re: Founding Engineer @ Lumen AI",
+    "body": "Hi, checking in \u2014 did you get a chance to review the role? No rush, just wanted to make sure my last note didn't get buried.",
+    "expected": "recruiter/replied"
+  },
+  {
+    "id": "var-33",
+    "from": "talent@ferrous.example",
+    "subject": "Re: SDE II role \u2014 got your resume",
+    "body": "Hi, got your resume \u2014 thanks for sending it over. Sharing it with the team now and I'll follow up once they've had a look.",
+    "expected": "recruiter/replied"
+  }
+]
