@@ -7,8 +7,10 @@
  *  - --score: benchmark mode. Runs every model in META_MODELS over the
  *    generic golden set with the same prompt and prints the comparison
  *    table (accuracy, calibration, format failures, gate precision) plus
- *    the rules baseline. Needs .env (see .env.example). No key is
- *    committed.
+ *    the rules baseline, then one per-email outcome line per email (id,
+ *    expected, rules, LLM label + confidence or failure reason, gate
+ *    decision) with repaired counts and a failure-reason breakdown.
+ *    Needs .env (see .env.example). No key is committed.
  */
 import "dotenv/config";
 import { readFile } from "node:fs/promises";
@@ -19,6 +21,7 @@ import { screenForLLM } from "./safety.js";
 import { makeLlamaClassifier } from "./llama.js";
 import {
   printComparison,
+  printPerEmailOutcomes,
   scoreModel,
   type ModelScore,
 } from "./evaluate.js";
@@ -57,6 +60,7 @@ if (process.argv.includes("--score")) {
     scores.push(await scoreModel(m, makeLlamaClassifier(m), emails));
   }
   printComparison(scores);
+  printPerEmailOutcomes(scores);
 } else {
   emails.forEach((email, i) => {
     const result = classifyByRules(email);
