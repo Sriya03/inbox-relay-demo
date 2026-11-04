@@ -47,6 +47,39 @@ For mail that does reach a model, the payload is minimized: sender, subject, and
 
 The boundary is proven, not just claimed: the scorer verifies that local-only and blocked mail had zero model calls. Any call on that mail would count as a failure.
 
+## Why not just use a general assistant or a Gmail tool?
+
+A general assistant can label mail, and for an occasional inbox it is enough. Ask it
+about a thread and it reads it, understands it, and drafts a reply for you to approve
+before anything sends. That is one-off, human-checked work, and it is the right tool
+when you are looking at one message at a time.
+
+This demo is built for a different job: running on its own, every day, over a whole
+inbox, with no human watching each email. That changes what has to be true about it.
+
+- **Different stakes get different handling.** A general tool treats mail the same
+  way whatever it is. Here, interview, offer-process, and recruiter mail is
+  classified by rules alone, labeled only, and never auto-archived — no matter what
+  any model says. Only generic template mail can reach a model, and only an
+  agreement plus 0.85 confidence can archive it.
+- **Safety is in the code, and it is checked.** "Safely" in most tools means a
+  policy: encryption in transit, OAuth, a promise not to train on your data. Here
+  the boundary is also a test you can run: the scorer proves local-only mail
+  (33/33) and blocked mail (2/2) had zero model calls. Any call on that mail
+  counts as a failure, not as a result.
+- **It never sends, and it only labels.** A general assistant in chat can draft
+  freely and, with approval, send. This demo drafts only, never sends, and its
+  job is labeling — it does not act on instructions embedded in an email.
+- **It is measured, not just claimed.** The benchmark reports per-email outcomes
+  and gate archive precision (19 at 100% on the synthetic set, 11 at 100% on the
+  labeled real-mail run). A general tool does not report its archive precision,
+  because it does not measure it.
+
+The honest limit is part of the point: if all you want is to label an inbox once in
+a while, this is overkill. Its value shows up when you want it autonomous, every
+day, with a measured error rate, and with interview and offer mail protected even
+when no one is checking each email by hand.
+
 ## Results
 
 ### Synthetic benchmark
