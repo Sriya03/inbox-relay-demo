@@ -1,196 +1,83 @@
-# inbox-relay-demo — hackathon demo (synthetic mail only)
+# inbox-relay-demo
 
-Built for the Meta Global AI Developer Hackathon 2026 (indie track).
+A privacy-first inbox triage demo for job seekers, built for the Meta Global AI Developer Hackathon 2026.
 
-## The problem: a job seeker's inbox is flooded
+Job hunting floods an inbox. Recruiter pitches, interview invites, offer letters, rejections, application confirmations, and promos arrive mixed together, and the mail that matters most — an interview invite, an offer — is the easiest to miss. inbox-relay-demo sorts that inbox so interviews and offers do not get buried under promos.
 
-A job search produces hundreds of emails: recruiter pitches, interview
-invites, offer letters, rejections, application confirmations, newsletters,
-and promos. The important mail (an interview invite, an offer) gets buried
-under the rest, and missing it costs an opportunity. Triaging by hand takes
-hours a week.
+## What it does
 
-This demo labels every email and drafts a reply where one is needed, so the
-seeker can spot interviews and offers at a glance and answer in minutes. It
-is a command-line demo on 67 synthetic emails: rules label them, a safety
-screen checks them, and (with a key) Llama models classify the generic
-ones behind an agreement gate.
+The demo labels mail, drafts a reply where one fits, and never sends anything on its own. It runs on synthetic mail only, so you can see the full pipeline — rules, safety screen, model, and gate — without handing over a real inbox.
 
-## How it works: rules first, LLM second (only for generic mail), gate decides
+It sorts mail into 8 labels:
 
-- Rules: fast, precise, offline. They catch the clear cases (an offer
-  letter, a rejection) but miss reworded mail.
-- LLM: flexible. It catches intent and paraphrases the rules miss, but it
-  can be overconfident and wrong. It only ever sees generic template mail
-  (see below): specific mail never reaches it.
-- Gate: for generic mail, the two must agree AND the LLM must be
-  confident (>= 0.85), or the mail stays in the inbox. Interview and offer
-  mail is never auto-archived: it is labeled only, because those are the
-  emails the seeker must see herself.
+| Label | Means |
+|---|---|
+| interview | Invites, schedules, or confirms an interview, screen, or round |
+| offer-process | Offer letter, compensation, background check, or onboarding steps |
+| recruiter/new | First outreach from a recruiter about a role not discussed before |
+| recruiter/replied | A reply in a recruiter conversation already under way, with no interview invite |
+| rejects | You were not selected, or the team is moving forward with others |
+| application | Confirmation your application was received, with no decision yet |
+| read-later | A newsletter, article, or roundup worth reading later, not a job pitch |
+| promos | Marketing, discounts, course sales, or bulk offers |
 
-Neither side alone is trusted. The gate takes the intersection, and the
-honest "I don't know" (label `none`) stays in the inbox instead of being
-force-labeled and lost.
+Two more outcomes are possible, and both stay in the inbox: `none` means no rule matched, and `blocked` means the safety screen refused the mail.
 
-## Why guardrails: a job-search inbox holds personal information
+## How it works
 
-Offer letters carry compensation. Background-check forms carry Social
-Security numbers and dates of birth. Immigration mail carries USCIS case
-numbers. Payroll and bank mail carry account details. A triager that sends
-mail to an LLM ships all of that to a third-party API.
+Every email is read locally first. The rules on your machine label it, and that local label decides what happens next.
 
-So this demo has two boundary layers, both enforced in code before any
-network call:
+- **Rules only, for personal dealings.** Interview, offer-process, recruiter/new, and recruiter/replied mail is classified by rules alone. It never leaves the machine, and it is never auto-archived. It is labeled only, so it stays visible.
+- **Rules plus a model, for generic template mail.** Application confirmations, form rejections, promos, and read-later mail may reach a Meta model, which returns a label and a confidence.
+- **A gate decides an archive.** For generic mail, the rules and the model must agree, and the model must be at least 0.85 confident, or the mail stays in the inbox. A disagreement, a low confidence, or an unknown label all mean the same thing: stay, do not archive.
+- **Drafts only.** The demo can draft a reply. It never sends one.
 
-1. Sensitive screen: blocked senders (banks, government/immigration,
-   employer, payroll) and blocked content (SSN, USCIS case numbers,
-   passport, date of birth, bank account references). Blocked mail is
-   rules-only: it is never sent to any model.
-2. Category rule: only generic template mail (application confirmations,
-   form rejections, promos, newsletters) may reach a model. That mail is
-   bulk mail: it reveals nothing specific about the seeker's dealings.
-   Specific mail (interviews, offers, recruiter threads) carries the
-   seeker's actual dealings: company names, roles, timing, people. That
-   mail never leaves the machine: rules-only, label-only, zero API calls.
-   Unknown mail also stays local: an unknown email might contain anything,
-   so it is never sent to find out.
+Neither side is trusted alone. The rules are fast and explainable but miss reworded mail. The model catches intent and paraphrases but can be overconfident. The gate takes only the intersection, and the honest "I don't know" stays in the inbox instead of being force-labeled and lost.
 
-Payloads for the mail that does go to a model are minimized: sender + subject +
-first 1000 chars of body, no attachments, no full threads. And the demo
-data is synthetic: no real mail, no credentials, no API keys anywhere in
-this repo or its history.
+## Privacy and safety
 
-The guardrails are what let this tool graduate from a demo to a real
-inbox. Without them, running it on real mail would leak personal
-information. With them, the useful part (triaging recruiter mail) works
-while the personal part never leaves the machine.
+A job-search inbox holds personal information. Offer letters carry compensation. Background-check forms carry Social Security numbers and dates of birth. Immigration mail carries case numbers. Payroll and bank mail carry account details. A triager that sends mail to a model ships all of that to a third-party API. This demo is built so that does not happen.
 
-## Privacy: what Relay does that a general Gmail MCP doesn't
+Two boundary layers run in code, before any network call:
 
-| | General Gmail MCP | Relay (this repo) |
-|---|---|---|
-| What reaches the model | Full mail content the tool returns | Generic template mail only; specific mail throws before any network call |
-| Who decides an archive | A single model call | Rules + model must agree, and confidence ≥ 0.85, or it stays |
-| Interview / offer mail | Treated like any other mail | Never auto-archived, ever (label-only) |
-| Third parties that see your mail | The MCP proxy (which logs payloads by default) plus the model provider | No proxy; direct Gmail OAuth, local token, model sees generic mail only |
-| Proof specific mail stayed local | Usually a claim | A test: `npm run score` verifies 33/33 local + 2/2 blocked had zero model calls |
-| Public artifacts | Often demo on real mail | Synthetic only; real-mail claims are aggregate counts, never content |
-| Sending | Often sends on the model's say-so | Drafts only; nothing auto-sends |
+1. **Sensitive screen.** Blocked senders (banks, government and immigration, employer, payroll) and blocked content (Social Security numbers, case numbers, passport, date of birth, bank account references) are refused outright. Blocked mail is rules-only and is never sent to any model.
+2. **Category rule.** Only generic template mail may reach a model. That mail is bulk mail: it reveals nothing specific about your dealings. Specific mail carries your actual dealings — company names, roles, timing, people — so it never leaves the machine. Unknown mail also stays local: an unknown email might contain anything, so it is never sent to find out.
 
-Relay's Gmail scope is `gmail.modify` (label/archive, not permanent delete, not full
-`mail.google.com` access). Its token is local-only, 0600, gitignored. Every gate
-decision carries a reason string, so an archive is explainable — and a Gmail
-archive is reversible, not a delete.
+For mail that does reach a model, the payload is minimized: sender, subject, and the first 1000 characters of the body. No attachments, no full threads. The demo data is synthetic, so no real mail, no Gmail credentials, and no API keys are in this repo or its history.
 
-## How Meta models are used, and which one is best
+The boundary is proven, not just claimed: the scorer verifies that local-only and blocked mail had zero model calls. Any call on that mail would count as a failure.
 
-Meta's Llama models (via the Meta Model API, using the hackathon credits)
-fill the LLM slot in the gate, for generic mail only. They do not replace
-the rules; they cover what the rules miss on the bulk mail, and the gate
-keeps them honest.
+## Results
 
-Best is not picked on vibes. Every candidate model runs over the same
-generic golden set (32 emails) with the same fixed prompt (temperature 0,
-JSON-only output), and the scorer prints one table: accuracy, confidence
-when right vs wrong (calibration), format failures, agreement with the
-rules, and gate archive precision. The winner is the highest accuracy,
-then the best calibration, then the fewest format failures. If a smaller
-model ties a bigger one, the smaller one wins: same score, less to run.
-The rules baseline is printed alongside, so you can see exactly what the
-LLM adds over rules alone. The scorer also proves the boundary: the 33
-local-only emails and the 2 blocked emails must show zero model calls,
-and any call on them counts as a failure.
+### Synthetic benchmark
 
-Status: benchmark run Nov 2. Both candidate models tied on the
-32-email generic set (19/32 each), so the pick is a tie-break on
-confidence and size, not a measured accuracy difference.
+The benchmark runs every candidate model over the same 32-email generic synthetic set, with the same fixed prompt (temperature 0, JSON-only output). The scorer prints accuracy, confidence when right, agreement with the rules, and gate archive precision, with the rules baseline alongside, so you can see exactly what the model adds over rules alone.
 
-| model | accuracy (generic) | conf. when right | conf. when wrong | failures | agrees with rules | gate archives @ precision | local (zero calls) | safety |
-| muse-wonder-1.0 | 19/32 (59%) | 0.96 | n/a (13 skipped, no valid wrong predictions) | 13 | 19/19 | 18 @ 100% | 33/33 | 2/2 |
-| muse-spark-1.2 | 19/32 (59%) | 0.98 | n/a (13 skipped, no valid wrong predictions) | 13 | 19/19 | 19 @ 100% | 33/33 | 2/2 |
+| Model | Accuracy (generic) | Confidence when right | Agreement with rules | Gate archives at precision | Local (zero calls) | Safety |
+|---|---|---|---|---|---|---|
+| muse-wonder-1.0 | 19/32 (59%) | 0.96 | 19/19 | 18 at 100% | 33/33 | 2/2 |
+| muse-spark-1.2 | 19/32 (59%) | 0.98 | 19/19 | 19 at 100% | 33/33 | 2/2 |
 
-Rules baseline (no LLM): 19/32 correct on generic mail. Pick:
-muse-spark-1.2 — tied on generic accuracy (19/32) and failures (13),
-higher confidence when right (0.98 vs 0.96), and the smaller model
-wins a tie. Scope: 32 emails is still small (1 email ≈ 3 points), so
-this is directional, not a claim that one model is generally better.
-Correction (new run, dafeb98): the 13 are NOT format failures.
-Per-email reporting shows all 13 were skipped: the rules labeled
-generic mail as local-only (11 as none, 2 as recruiter/new), so the
-LLM was never called on them — the scorer counted skips as failures.
-The models produced valid output on all 19 they were called on
-(19/19, 0 valid-wrong), and repair rescued 0 because nothing was
-malformed. The harder set exposed rules fragility (rules miss generic
-mail), not model output fragility; the gate held at 100% precision on both.
+Rules alone, with no model: 19/32 on generic mail.
 
-Separately, dry-run on 30 real inbox emails (nothing applied, nothing recorded):
-gate agreed 21 archive / 9 stays, rules–LLM agreement 21/23, 0 failures,
-0 LLM calls on local/blocked mail. Sample was promo-heavy (23 promos, no
-interview/offer mail) — the local-only branch was proven on unknown mail,
-not on interview/offer mail.
+The pick is muse-spark-1.2. The two models tied on accuracy, so the pick is a tie-break on confidence and size, not a measured accuracy advantage: higher confidence when right (0.98 versus 0.96), and the smaller model wins a tie.
 
-## Labels
+The 13 cases counted as failures for each model are skipped cases, not format failures. Per-email reporting shows the rules labeled that generic mail as local-only (11 as none, 2 as recruiter/new), so the model was never called on it. On the mail the models were actually called on, they were right on all 19, with no valid wrong predictions. The harder set exposed rules fragility — rules miss generic mail — not model output fragility, and the gate held at 100% precision on both models.
 
-LLM-eligible (generic template mail, may reach a model and be archived):
+32 emails is a small set (one email is about 3 points), so treat these numbers as directional, not as a claim that one model is generally better.
 
-- application: confirms your application was received, with no decision yet
-- rejects: says you were not selected, or they are moving forward with others
-- promos: marketing, discounts, course sales, or bulk offers
-- read-later: a newsletter, article, or roundup worth reading later, not a job pitch
+### Current state on real mail
 
-Local-only (specific mail, never sent to any model, never auto-archived):
+We are continuously improving this, and this is the current state on real mail. Both runs below were dry runs only: nothing applied, nothing recorded, aggregate counts only, no real mail shown.
 
-- interview: invites you to, schedules, or confirms an interview, screen, or round
-- offer-process: offer letter, compensation, background check, or onboarding steps
-- recruiter/new: first outreach from a recruiter about a role you have not discussed before
-- recruiter/replied: continues an existing recruiter conversation (a reply) without inviting you to an interview
+- First run, 30 emails: the gate agreed on 21, 9 stayed in the inbox.
+- Second run, labeled, 30 emails: rules got 18 right, the model got 22 of the 23 it saw, and the gate archived 11 at 100% precision.
 
-Other outcomes:
-
-- none: no rule matched; stays in the inbox (the honest "I don't know")
-- blocked: the safety screen refused it; never sent to any model
-
-## Status: what is actually in this repo (Nov 2)
-
-Built and runnable right now:
-
-- `data/synthetic-emails.json`: 67 invented emails, each with an `expected`
-  label (the ground truth for scoring).
-- `src/rules.ts`: first-match rules over the 8-label taxonomy.
-- `src/safety.ts`: the two boundary layers described above.
-- `src/prompt.ts`: the fixed classification prompt (same for every model).
-- `src/llama.ts`: the Meta model client (screen first, category check,
-  minimized payload, validates label and confidence).
-- `src/gate.ts`: the agreement gate, plus the no-LLM local decision.
-- `src/evaluate.ts`: the benchmark scorer and comparison table, including
-  the zero-calls proof for local-only and blocked mail.
-- `src/cli.ts`: demo mode (offline, zero API calls) and `--score` mode
-  (benchmark).
-- `src/drafts.ts`: reply templates for 5 labels; none for
-  rejects/read-later/promos.
-
-Not in this repo: anything from Relay's codebase (nothing copied), any
-real mail, any credentials, any API keys. Benchmark run Nov 2 — table in
-'How Meta models are used' above.
-
-## Disclosure (also the video's opening line)
-
-Pre-existing: Relay, my separate inbox triager (design only: the 8-label
-taxonomy and the rules + LLM agreement-gate idea). Built this week in this
-repo: synthetic data, rules baseline, safety screen, fixed prompt, Llama
-client, gate, scorer, CLI. Run Nov 2: the model benchmark. Relay lives
-separately at https://github.com/Sriya03/inbox-relay: no code or git
-history from it is in this repo. This repo was created Oct 28, 2026, and
-its history starts that day.
-
-## Data: 100% synthetic
-
-Every email is invented: fictional companies and people, `.example`
-domains, fake identifiers in the two sensitive cases (a made-up account
-ending, a made-up case number). No real Gmail, no OAuth, no credentials, no
-API keys, no real mail anywhere in this repo or its history.
+Coverage is what we are improving next. The first run was promo-heavy (23 promos, no interview or offer mail), so the local-only branch was proven on unknown mail, not on interview or offer mail.
 
 ## Run it
+
+You need Node.js and npm. No key is needed for the offline demo. A Meta API key is needed only for the benchmark.
 
 ```sh
 npm install
@@ -198,39 +85,47 @@ npm run build
 npm run demo    # offline: rules + safety + drafts, zero API calls
 ```
 
-Demo output: 67 emails. 32 generic ones read "not called in demo mode";
-32 specific ones read "never sent (specific mail stays local)"; 1 unknown
-reads "never sent (unknown mail stays local)"; 2 blocked ones read "LLM
-skipped (sensitive — never sent)".
+Demo output covers 67 emails: 32 generic emails read as not called in demo mode, 32 specific emails read as never sent, 1 unknown email read as never sent, and 2 blocked emails read as skipped as sensitive.
 
 ```sh
 cp .env.example .env   # fill in META_API_BASE_URL, META_API_KEY, META_MODELS
-npm run score          # benchmark every listed model, print the table
+npm run score          # benchmark every listed model and print the table
 ```
 
-## What's next (planned, not done)
+Your `.env` file is gitignored. Never commit it, and never show it on screen.
 
-1. Benchmark run + winner's table in this README (done Nov 2, re-run on the 67-email set).
-2. 3-minute demo video (opens with the disclosure line above, and answers
-   the same questions as this README: the use, the guardrails, the models).
-3. Submit by Nov 4, 9:00 PM ET.
+## Can I run this on my own Gmail?
 
-## Future work: from demo to production
+Not from this repo. This demo does not connect to Gmail, on purpose: it is synthetic only, so judges and readers can run the full pipeline without handing over a real inbox, and no real mail ever enters this repo.
 
-This demo proves the gate and the safety boundary on synthetic mail. It is not
-production. To get there: (1) a real-mail golden set (100–200 labeled emails,
-stratified, with a held-out test split) and per-label metrics with error analysis;
-(2) output robustness — JSON mode, retry, and repair — to eliminate format
-failures, then a local classifier (embeddings + logistic regression, local-only)
-compared against LLM and rules on dev, with the gate threshold swept on data
-instead of asserted; (3) safety hardening — explicit domain allow/block lists
-instead of substring matching, PII redaction on generic payloads, an audit log
-with undo for archives, and a provider training-terms check before any real mail
-is sent; (4) a ship loop — shadow mode, then label-only, then archive promos
-only, then archive all agreed — with monitoring (none-rate, disagreement-rate,
-archive precision, drift) and versioned rules, prompt, and threshold
-regression-checked on test before every change; (5) tests for rules, safety,
-gate, and scorer, CI, and the tie-break rule enforced in code.
+If you want the same idea on real mail, start from Relay, the separate project this demo builds on: https://github.com/Sriya03/inbox-relay
+
+Relay connects to Gmail with a local, read-only-first approach — read, label, and draft only, never auto-send — and its real-mail work proceeds dry-run and label-only first, with approval before anything archives. A Gmail runner is not part of this demo, and adding one here would change the privacy story above, so it belongs in Relay, not in this demo.
+
+## Data
+
+**Synthetic data, in this repo and reproducible.** `data/synthetic-emails.json` holds 67 invented emails, each with an expected label: 8 per label across the 8 labels, plus 1 none and 2 blocked safety cases. Every company, person, and domain is fictional (`.example` domains, made-up identifiers in the blocked cases). Run `npm run score` to reproduce the synthetic benchmark table above.
+
+**Real-mail data, not in this repo and not reproducible from it.** The two real-mail runs quoted above were run locally on a private inbox, dry-run only. No dataset is published, no content is shared, and no real mail is in this repo or its history. That is intentional: publishing real inbox mail would break the privacy rule this project is built on. Judges can reproduce the synthetic numbers; the real-mail numbers are aggregate counts only, and should be read as a current-state check, not as a reproducible benchmark.
+
+## Future work
+
+The direction is clear, and it starts with better labeling, not with sending more mail out:
+
+1. A bigger golden set: 100–200 labeled real emails, with a held-out test split that is never tuned on, plus per-label metrics and error analysis.
+2. A local model first: classify type locally, including interview mail, so interview mail gets a proper label without leaving the machine. Rules then handle just the simple template cases.
+3. An external model for generic mail only, with the gate threshold tuned on data instead of asserted, and confidence calibrated on that data.
+4. Safety hardening: explicit domain lists instead of substring matching, PII redaction on generic payloads, an audit log with undo for archives, and a provider terms check before any real mail is sent.
+5. A staged rollout: shadow mode, then label-only, then archive promos only, then archive all agreed — with monitoring (none-rate, disagreement-rate, archive precision, drift) and versioned rules, prompt, and threshold checked against the test set before every change.
+6. Metadata tagging on top of the flat 8 labels (company, role, thread stage, deadline, action requested), with no subcategories: the 8 labels stay.
+7. Tests for rules, safety, gate, and scorer, with continuous integration and the tie-break rule enforced in code.
+8. Interview and offer mail always label-only, never auto-archived, whatever the classifier says.
+
+## Disclosure
+
+Pre-existing: Relay, the separate inbox triager — its design only, namely the 8-label taxonomy and the rules-plus-model agreement-gate idea. No code or history from Relay is in this repo.
+
+Built here: synthetic data, the rules baseline, the safety screen, the fixed prompt, the Meta model client, the gate, the scorer, and the command-line interface. This demo runs on synthetic data only: no real mail, no Gmail credentials, and no API keys anywhere in this repo or its history.
 
 ## License
 
